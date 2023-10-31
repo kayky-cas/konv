@@ -133,7 +133,7 @@ impl From<String> for NameConvention {
             "k" | "K" | "kebab" | "Kebab" => NameConvention::Kebab,
             "ss" | "SS" | "screamming" | "Screamming" => NameConvention::ScreammingSnake,
             _ => {
-                println!("Invalid name convention");
+                eprintln!("Invalid name convention");
                 exit(1);
             }
         }
@@ -142,7 +142,7 @@ impl From<String> for NameConvention {
 
 fn next_arg(program_name: &str, args: &mut Args) -> String {
     args.next().unwrap_or_else(|| {
-        println!("Usage: {} <from> <to>", program_name);
+        eprintln!("Usage: {} <from> <to>", program_name);
         exit(1);
     })
 }
