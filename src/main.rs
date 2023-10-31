@@ -157,7 +157,7 @@ fn main() {
     stdin()
         .lines()
         .flatten()
-        .map(|l| NameConvention::convert(from, &l, to))
+        .map(|l| NameConvention::convert(from, &l.trim(), to))
         .for_each(|k| println!("{}", k));
 }
 
