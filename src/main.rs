@@ -131,7 +131,7 @@ impl From<String> for NameConvention {
             "c" | "C" | "camel" | "Camel" => NameConvention::Camel,
             "s" | "S" | "snake" | "Snake" => NameConvention::Snake,
             "k" | "K" | "kebab" | "Kebab" => NameConvention::Kebab,
-            "ss" | "SS" | "screamming" | "Screamming" => NameConvention::ScreammingSnake,
+            "sc" | "SC" | "screamming" | "Screamming" => NameConvention::ScreammingSnake,
             _ => {
                 eprintln!("Invalid name convention");
                 exit(1);
