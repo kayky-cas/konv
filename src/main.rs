@@ -20,7 +20,7 @@ impl NameConvention {
         let mut last = 0;
 
         for (i, c) in buff.chars().enumerate() {
-            if c.is_uppercase() {
+            if c.is_uppercase() && i != 0 {
                 let buff = &buff[last..i];
 
                 if !buff.is_empty() {
@@ -58,10 +58,10 @@ impl NameConvention {
 
     fn convert_to_camel_case(buff: Vec<&str>) -> String {
         let mut result = String::new();
-        let mut buff = buff.iter();
+        let mut buff = buff.iter().map(|w| w.to_lowercase());
 
         if let Some(word) = buff.next() {
-            result.push_str(&word.to_lowercase());
+            result.push_str(&word);
         }
 
         for word in buff {
@@ -76,51 +76,24 @@ impl NameConvention {
     }
 
     fn convert_to_snake_case(buff: Vec<&str>) -> String {
-        let mut result = String::new();
-
-        for (i, word) in buff.iter().enumerate() {
-            let word = word.to_lowercase();
-
-            if i == 0 {
-                result.push_str(&word);
-            } else {
-                result.push('_');
-                result.push_str(&word);
-            }
-        }
-
-        result
+        buff.join("_").to_lowercase()
     }
 
     fn convert_to_screamming_snake_case(buff: Vec<&str>) -> String {
-        let mut result = String::new();
-
-        for (i, word) in buff.iter().enumerate() {
-            let word = word.to_uppercase();
-
-            if i == 0 {
-                result.push_str(&word);
-            } else {
-                result.push('_');
-                result.push_str(&word);
-            }
-        }
-
-        result
+        buff.join("_").to_uppercase()
     }
 
     fn convert_to_pascal_case(buff: Vec<&str>) -> String {
-        let mut result = String::new();
-
-        for word in buff.iter() {
-            let mut chars = word.chars();
-            if let Some(c) = chars.next() {
-                result.push(c.to_ascii_uppercase());
-            }
-            result.push_str(&chars.map(|c| c.to_ascii_lowercase()).collect::<String>());
-        }
-
-        result
+        buff.iter()
+            .map(|w| w.to_lowercase())
+            .fold(String::new(), |acc, word| {
+                let mut chars = word.chars();
+                if let Some(c) = chars.next() {
+                    acc + &c.to_ascii_uppercase().to_string() + &chars.collect::<String>()
+                } else {
+                    acc
+                }
+            })
     }
 }
 
@@ -212,11 +185,11 @@ mod tests {
 
     #[test]
     fn pascal_case_to_snake_case() {
-        let buff = String::from("HelloWorld");
+        let buff = String::from("NameConvention");
 
         let result = NameConvention::convert(NameConvention::Pascal, &buff, NameConvention::Snake);
 
-        assert_eq!(result, "hello_world");
+        assert_eq!(result, "name_convention");
     }
 
     #[test]
@@ -243,5 +216,31 @@ mod tests {
         );
 
         assert_eq!(result, "HELLO_WORLD");
+    }
+
+    #[test]
+    fn screamming_snake_case_to_camel_case() {
+        let buff = String::from("HELLO_WORLD");
+
+        let result = NameConvention::convert(
+            NameConvention::ScreammingSnake,
+            &buff,
+            NameConvention::Camel,
+        );
+
+        assert_eq!(result, "helloWorld");
+    }
+
+    #[test]
+    fn screamming_snake_case_to_snake_case() {
+        let buff = String::from("HELLO_WORLD");
+
+        let result = NameConvention::convert(
+            NameConvention::ScreammingSnake,
+            &buff,
+            NameConvention::Snake,
+        );
+
+        assert_eq!(result, "hello_world");
     }
 }
