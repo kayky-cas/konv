@@ -1,3 +1,10 @@
+use std::{
+    env::{args, Args},
+    io::stdin,
+    process::exit,
+};
+
+#[derive(Copy, Clone)]
 enum NameConvention {
     PascalCase,
     CamelCase,
@@ -29,7 +36,7 @@ impl NameConvention {
         words
     }
 
-    fn convert(from: Self, buff: String, to: Self) -> String {
+    fn convert(from: Self, buff: &str, to: Self) -> String {
         let global_format = match from {
             NameConvention::PascalCase => Self::separate_by_upper(&buff),
             NameConvention::CamelCase => Self::separate_by_upper(&buff),
@@ -117,12 +124,41 @@ impl NameConvention {
     }
 }
 
-fn main() {
-    let buff = String::from("helloWorld");
-    let result =
-        NameConvention::convert(NameConvention::CamelCase, buff, NameConvention::SnakeCase);
+impl From<String> for NameConvention {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "p" | "P" | "pascal" | "Pascal" => NameConvention::PascalCase,
+            "c" | "C" | "camel" | "Camel" => NameConvention::CamelCase,
+            "s" | "S" | "snake" | "Snake" => NameConvention::SnakeCase,
+            "k" | "K" | "kebab" | "Kebab" => NameConvention::KebabCase,
+            "ss" | "SS" | "screamming" | "Screamming" => NameConvention::ScreammingSnakeCase,
+            _ => {
+                println!("Invalid name convention");
+                exit(1);
+            }
+        }
+    }
+}
 
-    println!("{}", result);
+fn next_arg(program_name: &str, args: &mut Args) -> String {
+    args.next().unwrap_or_else(|| {
+        println!("Usage: {} <from> <to>", program_name);
+        exit(1);
+    })
+}
+
+fn main() {
+    let mut args = args();
+    let program_name = args.next().unwrap();
+
+    let from = next_arg(&program_name, &mut args).into();
+    let to = next_arg(&program_name, &mut args).into();
+
+    stdin()
+        .lines()
+        .flatten()
+        .map(|l| NameConvention::convert(from, &l, to))
+        .for_each(|k| println!("{}", k));
 }
 
 #[cfg(test)]
@@ -134,7 +170,7 @@ mod tests {
         let buff = String::from("helloWorld");
 
         let result =
-            NameConvention::convert(NameConvention::CamelCase, buff, NameConvention::SnakeCase);
+            NameConvention::convert(NameConvention::CamelCase, &buff, NameConvention::SnakeCase);
 
         assert_eq!(result, "hello_world");
     }
@@ -144,7 +180,7 @@ mod tests {
         let buff = String::from("hello_world");
 
         let result =
-            NameConvention::convert(NameConvention::SnakeCase, buff, NameConvention::CamelCase);
+            NameConvention::convert(NameConvention::SnakeCase, &buff, NameConvention::CamelCase);
 
         assert_eq!(result, "helloWorld");
     }
@@ -154,7 +190,7 @@ mod tests {
         let buff = String::from("helloWorld");
 
         let result =
-            NameConvention::convert(NameConvention::CamelCase, buff, NameConvention::PascalCase);
+            NameConvention::convert(NameConvention::CamelCase, &buff, NameConvention::PascalCase);
 
         assert_eq!(result, "HelloWorld");
     }
@@ -164,7 +200,7 @@ mod tests {
         let buff = String::from("HelloWorld");
 
         let result =
-            NameConvention::convert(NameConvention::PascalCase, buff, NameConvention::CamelCase);
+            NameConvention::convert(NameConvention::PascalCase, &buff, NameConvention::CamelCase);
 
         assert_eq!(result, "helloWorld");
     }
@@ -174,7 +210,7 @@ mod tests {
         let buff = String::from("hello_world");
 
         let result =
-            NameConvention::convert(NameConvention::SnakeCase, buff, NameConvention::PascalCase);
+            NameConvention::convert(NameConvention::SnakeCase, &buff, NameConvention::PascalCase);
 
         assert_eq!(result, "HelloWorld");
     }
@@ -184,7 +220,7 @@ mod tests {
         let buff = String::from("HelloWorld");
 
         let result =
-            NameConvention::convert(NameConvention::PascalCase, buff, NameConvention::SnakeCase);
+            NameConvention::convert(NameConvention::PascalCase, &buff, NameConvention::SnakeCase);
 
         assert_eq!(result, "hello_world");
     }
@@ -195,7 +231,7 @@ mod tests {
 
         let result = NameConvention::convert(
             NameConvention::ScreammingSnakeCase,
-            buff,
+            &buff,
             NameConvention::PascalCase,
         );
 
@@ -208,7 +244,7 @@ mod tests {
 
         let result = NameConvention::convert(
             NameConvention::PascalCase,
-            buff,
+            &buff,
             NameConvention::ScreammingSnakeCase,
         );
 
